@@ -7,16 +7,13 @@ nixPkgs = ['...', 'erlang']
 
 [phases.install]
 cmds = [
-  'mix local.hex --force',
-  'mix local.rebar --force',
-  'mix deps.get --only prod'
+    'mix local.hex --force',
+    'mix local.rebar --force',
+    'mix deps.get --only prod',
 ]
 
 [phases.build]
-cmds = [
-  'mix compile',
-  'mix assets.deploy'
-]
+cmds = ['mix compile']
 
 [start]
 cmd = "mix ecto.setup && mix phx.server"
