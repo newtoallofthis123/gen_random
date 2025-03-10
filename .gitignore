@@ -28,5 +28,3 @@ gen_random-*.tar
 /.elixir-tools
 
 /.env
-
-/priv
