@@ -8,10 +8,10 @@ defmodule GenRandomWeb.Router do
   scope "/", GenRandomWeb do
     pipe_through :api
 
-    get "/ping", HomeController, :index
+    get "ping", HomeController, :index
 
-    get "/generate", GenController, :index
-    post "/generate", GenController, :create
+    get "generate", GenController, :index
+    post "generate", GenController, :create
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

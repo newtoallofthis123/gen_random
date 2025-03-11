@@ -114,17 +114,74 @@ defmodule GenRandomWeb.GenController do
     end
   end
 
+  def generate_response(schema) do
+    generate_response(schema, "application/json", 5)
+  end
+
+  def generate_response(schema, number) do
+    generate_response(schema, "application/json", number)
+  end
+
+  @doc """
+  Sanitizes the output by removing all newlines and tabs.
+  """
+  def sanitise_output(output) do
+    output |> String.replace(~r/\n|\t/, "")
+  end
+
   def create(conn, params) do
-    with %{"schema" => schema, "type" => type, "number" => number} <- params,
-         {:ok, response} <- generate_response(schema, type, number) do
-      conn
-      |> put_status(:ok)
-      |> json(%{data: response})
-    else
+    with params when is_map(params) <- params do
+      case params do
+        %{"schema" => schema} when map_size(params) == 1 ->
+          case generate_response(schema) do
+            {:ok, response} ->
+              conn
+              |> put_status(:ok)
+              |> json(%{data: sanitise_output(response)})
+
+            error ->
+              handle_error(conn, error)
+          end
+
+        %{"schema" => schema, "number" => number} when map_size(params) == 2 ->
+          case generate_response(schema, number) do
+            {:ok, response} ->
+              conn
+              |> put_status(:ok)
+              |> json(%{data: sanitise_output(response)})
+
+            error ->
+              handle_error(conn, error)
+          end
+
+        %{"schema" => schema, "type" => type, "number" => number} ->
+          case generate_response(schema, type, number) do
+            {:ok, response} ->
+              conn
+              |> put_status(:ok)
+              |> json(%{data: sanitise_output(response)})
+
+            error ->
+              handle_error(conn, error)
+          end
+
+        _ ->
+          conn
+          |> put_status(:bad_request)
+          |> json(%{
+            error:
+              "Invalid parameters. Provide either 'schema' only or 'schema', 'type', and 'number'"
+          })
+      end
+    end
+  end
+
+  defp handle_error(conn, error) do
+    case error do
       :error ->
         conn
         |> put_status(:bad_request)
-        |> json(%{error: "Missing required parameters: schema, type, number"})
+        |> json(%{error: "Missing required parameters"})
 
       {:error, status_code} when is_integer(status_code) ->
         conn
