@@ -1,6 +1,9 @@
 defmodule GenRandomWeb.GenController do
   use GenRandomWeb, :controller
 
+  @doc """
+  The system prompt for the Google Gemini API.
+  """
   def system_prompt() do
     prompt = "You are a random data generator.
     Your job is to generate n number of random data entries based on the provided schema and type.
@@ -58,6 +61,9 @@ defmodule GenRandomWeb.GenController do
     prompt
   end
 
+  @doc """
+  Sends a request to the Google Gemini API.
+  """
   def send_req(body, api_key) do
     url =
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=#{api_key}"
@@ -79,6 +85,9 @@ defmodule GenRandomWeb.GenController do
     response
   end
 
+  @doc """
+  Parses the response from the Google Gemini API.
+  """
   def parse_response(body) do
     parsed = Jason.decode(body)
 
@@ -97,6 +106,11 @@ defmodule GenRandomWeb.GenController do
     end
   end
 
+  @doc """
+  Generates a random response based on the given schema, type, and number.
+  Calls the Google Gemini API to generate the response and is hence
+  blocking.
+  """
   def generate_response(schema, type, number) do
     api_key = System.get_env("GOOGLE_API_KEY")
     query = "Generate #{number} random #{type} entries based on the following schema: #{schema}"
