@@ -5,11 +5,13 @@ defmodule GenRandomWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", GenRandomWeb do
+  scope "/", GenRandomWeb do
     pipe_through :api
 
     get "/ping", HomeController, :index
-    post "/generate", GenController, :index
+
+    get "/generate", GenController, :index
+    post "/generate", GenController, :create
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

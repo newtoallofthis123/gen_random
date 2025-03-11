@@ -114,13 +114,12 @@ defmodule GenRandomWeb.GenController do
     end
   end
 
-  def index(conn, params) do
+  def create(conn, params) do
     with %{"schema" => schema, "type" => type, "number" => number} <- params,
          {:ok, response} <- generate_response(schema, type, number) do
       conn
       |> put_status(:ok)
-      |> put_resp_header("content-type", type)
-      |> text(response)
+      |> json(%{data: response})
     else
       :error ->
         conn
@@ -137,5 +136,11 @@ defmodule GenRandomWeb.GenController do
         |> put_status(:internal_server_error)
         |> json(%{error: "Internal server error", reason: reason})
     end
+  end
+
+  def index(conn, _params) do
+    conn
+    |> put_status(:ok)
+    |> json(%{message: "Generate endpoint, POST only"})
   end
 end
