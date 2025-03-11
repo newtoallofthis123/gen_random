@@ -1,4 +1,5 @@
 defmodule GenRandomWeb.GenController do
+  alias GenRandom.Repo
   use GenRandomWeb, :controller
 
   @doc """
@@ -145,6 +146,33 @@ defmodule GenRandomWeb.GenController do
 
   def create(conn, params) do
     with params when is_map(params) <- params do
+      # Add to requests table
+      ip_string = :inet.ntoa(conn.remote_ip) |> to_string()
+
+      # Check if the ip_string has a request that is less than a day old
+      requests =
+        Repo.query(
+          "SELECT COUNT(*) FROM requests WHERE addr = $1 AND inserted_at >= NOW() - INTERVAL '1 day'",
+          [
+            ip_string
+          ]
+        )
+
+      case requests do
+        {:ok, %Postgrex.Result{rows: [[count]]}} when count > 50 ->
+          conn
+          |> put_status(:too_many_requests)
+          |> json(%{error: "Too many requests! You have run out of your free 50 requests/day."})
+
+        _ ->
+          :ok
+      end
+
+      case Repo.insert(%GenRandom.Request{addr: ip_string, endpoint: conn.request_path}) do
+        {:ok, _} -> :ok
+        {:error, _} -> :error
+      end
+
       case params do
         %{"schema" => schema} when map_size(params) == 1 ->
           case generate_response(schema) do

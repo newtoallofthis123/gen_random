@@ -46,7 +46,8 @@ defmodule GenRandom.MixProject do
       {:dotenv, "~> 3.0.0"},
       {:dns_cluster, "~> 0.1.1"},
       {:httpoison, "~> 1.8"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:timex, "~> 3.7"}
     ]
   end
 
